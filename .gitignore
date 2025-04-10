@@ -12,6 +12,7 @@ pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+C:\Users\HP\Desktop\safety\emergency\communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json
 
 # OS
 .DS_Store
@@ -56,3 +57,4 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json
+C:\Users\HP\Desktop\safety\emergency\dust.tar
