@@ -6,6 +6,7 @@
 # Logs
 logs
 *.log
+*.tar
 npm-debug.log*
 pnpm-debug.log*
 yarn-debug.log*
@@ -54,3 +55,4 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json
