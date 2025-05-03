@@ -7,4 +7,19 @@ export class EmergencyData{
     triggerId: string
     triggeredAt: Date
     type: string
+    sourceDistrict: string
+    triggerName: string
+}
+
+export class RespondData{
+    responderId:string
+    id: string
+    respondedAt: Date
+    triggerId: string
+    responderName: string
+}
+
+export interface Location{
+    latitude: number
+    longitude: number
 }
