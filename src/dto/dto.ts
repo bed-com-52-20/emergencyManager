@@ -23,3 +23,11 @@ export interface Location{
     latitude: number
     longitude: number
 }
+
+export class CancelTriggerData{
+    documentId: string
+    triggerType: string
+    latitude: number
+    longitude: number
+    fullName: string
+}

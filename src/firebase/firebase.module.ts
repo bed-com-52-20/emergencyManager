@@ -2,12 +2,13 @@ import { Global, Module } from "@nestjs/common";
 import { FirebaseService } from "./firebase.service";
 import { FirebaseController } from "./firebase.controller";
 import { LocationService } from "./location.service";
+import { NotificationService } from "./notification.service";
  
 
 @Global()
 @Module({
   imports: [],
-  providers: [FirebaseService, LocationService],
+  providers: [FirebaseService, LocationService, NotificationService],
   controllers: [FirebaseController],
   exports: [FirebaseService]
 })

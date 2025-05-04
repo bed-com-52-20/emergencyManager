@@ -1,7 +1,7 @@
 // user.controller.ts
 import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
 import { FirebaseService } from './firebase.service';
-import { EmergencyData, RespondData } from 'src/dto/dto';
+import { CancelTriggerData, EmergencyData, RespondData } from 'src/dto/dto';
 
 @Controller('emergency')
 export class FirebaseController {
@@ -34,6 +34,17 @@ export class FirebaseController {
     console.log('Accesssed')
     try {
         return await this.firebaseService.respond(data);
+    } catch (error) {
+        console.log(error)
+        throw new HttpException('Operation failed', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('cancel')
+  async cancelTrigger(@Body() data: CancelTriggerData){
+    console.log('Accesssed')
+    try {
+        return await this.firebaseService.cancelTrigger(data);
     } catch (error) {
         console.log(error)
         throw new HttpException('Operation failed', HttpStatus.INTERNAL_SERVER_ERROR);
