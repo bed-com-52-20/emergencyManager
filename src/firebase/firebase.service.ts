@@ -9,12 +9,14 @@ import { NotificationService } from './notification.service';
 @Injectable()
 export class FirebaseService implements OnModuleInit {
   onModuleInit() {
-    admin.initializeApp({
-      credential: admin.credential.cert(require(
-        // '/home/unimathe/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
-        'C:/Users/HP/Desktop/safety/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
-      ) as admin.ServiceAccount),
-    });
+    if (!admin.apps.length){
+      admin.initializeApp({
+        credential: admin.credential.cert(require(
+          // '/home/unimathe/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
+          'C:/Users/HP/Desktop/safety/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
+        ) as admin.ServiceAccount),
+      });
+    }
   }
 //   
   constructor(private readonly locationService: LocationService, 
@@ -52,7 +54,7 @@ export class FirebaseService implements OnModuleInit {
         }
         const tokens = nearbyUsers
           .map((user: any) => user?.deviceToken)
-          .filter((token: string | undefined | null) => token && token !== '');
+          .filter((token: string | undefined | null) => token && token.trim() !== '');
         if (tokens.length != 0){
           const emergenciesRef = this.firestore.collection('emergencies');
           const occurrences = (await emergenciesRef.where('type', '==', userData.type).get()).size;
@@ -63,7 +65,7 @@ export class FirebaseService implements OnModuleInit {
               );
             }
             else{
-              console.log('Null oe empty deviceToken')
+              console.log('Null or empty deviceToken')
             }
           }
           return documentRef.id

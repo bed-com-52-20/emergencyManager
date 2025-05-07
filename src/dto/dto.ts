@@ -31,3 +31,21 @@ export class CancelTriggerData{
     longitude: number
     fullName: string
 }
+
+export interface RequestData {
+    api_key: string;
+    password: string;
+    text: string;
+    numbers: string;
+    from: string;
+  }
+
+  export class BroadcastToAllData{
+    message: string
+    senderName: string
+    sentAt: Date
+    senderId: string
+    origin: string
+    latitude: number
+    longitude: number
+  }

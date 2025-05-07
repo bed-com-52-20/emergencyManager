@@ -1,13 +1,14 @@
-import { EmergencyData, Location } from "src/dto/dto";
+import { EmergencyData } from "src/dto/dto";
 import * as admin from 'firebase-admin';
-import { NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 
+@Injectable()
 export class NotificationService{
     constructor(){}
 
-    async sendNotificationsToOfficers(){
+    // async sendNotificationsToOfficers(){
         
-    }
+    // }
     
     async sendResponseNotification(deviceToken: string, responderName: string,
         messaging: admin.messaging.Messaging,
