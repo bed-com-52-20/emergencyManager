@@ -9,6 +9,7 @@ export class EmergencyData{
     type: string
     sourceDistrict: string
     triggerName: string
+    email: string
 }
 
 export class RespondData{
@@ -30,6 +31,7 @@ export class CancelTriggerData{
     latitude: number
     longitude: number
     fullName: string
+    email: string
 }
 
 export interface RequestData {
@@ -48,4 +50,12 @@ export interface RequestData {
     origin: string
     latitude: number
     longitude: number
+    email: string
   }
+
+  export interface SMSResponse {
+  type: string;
+  msg: string;
+  code: string;
+  feedback?: boolean;
+}

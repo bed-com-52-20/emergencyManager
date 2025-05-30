@@ -5,10 +5,6 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class NotificationService{
     constructor(){}
-
-    // async sendNotificationsToOfficers(){
-        
-    // }
     
     async sendResponseNotification(deviceToken: string, responderName: string,
         messaging: admin.messaging.Messaging,
@@ -65,24 +61,24 @@ export class NotificationService{
         async sendCancelNotification(deviceToken: string, fullName: string, 
             documentId: string, messaging: admin.messaging.Messaging
         ){
-            try {
-              const message = {
-                token: deviceToken, 
-                notification: {
-                  title: `cancelling emergency triggered`,
-                  body: `Previous trigger: ${fullName}`,
-                },
-                data: {
-                  documentId: documentId,
-                  notificationType: 'cancel'
-                },
-              };
-              console.log('sending message')
-              const response = await messaging.send(message);
-              console.log('message sent')
-              return { message: 'Notification sent', fcmResponse: response };
-            } catch (error) {
-              console.log(error)
-            }
+          try {
+            const message = {
+              token: deviceToken, 
+              notification: {
+                title: `cancelling emergency triggered`,
+                body: `Previous trigger: ${fullName}`,
+              },
+              data: {
+                documentId: documentId,
+                notificationType: 'cancel'
+              },
+            };
+            console.log('sending message')
+            const response = await messaging.send(message);
+            console.log('message sent')
+            return { message: 'Notification sent', fcmResponse: response };
+          } catch (error) {
+            console.log(error)
           }
+        }
 }

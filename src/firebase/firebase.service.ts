@@ -5,6 +5,7 @@ import { CancelTriggerData, EmergencyData, Location, RespondData } from 'src/dto
 import { GeoPoint } from '@google-cloud/firestore';
 import { LocationService } from './location.service';
 import { NotificationService } from './notification.service';
+import { BroadCastService } from 'src/broadcast/broadcast.service';
 
 @Injectable()
 export class FirebaseService implements OnModuleInit {
@@ -12,7 +13,8 @@ export class FirebaseService implements OnModuleInit {
     if (!admin.apps.length){
       admin.initializeApp({
         credential: admin.credential.cert(require(
-          // '/home/unimathe/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
+          process.env.NODE_ENV === 'production' ?
+          '/home/unimathe/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json' :
           'C:/Users/HP/Desktop/safety/emergency/communitysafetyapplication1-firebase-adminsdk-fbsvc-937f53ad15.json'
         ) as admin.ServiceAccount),
       });
@@ -20,7 +22,9 @@ export class FirebaseService implements OnModuleInit {
   }
 //   
   constructor(private readonly locationService: LocationService, 
-    private readonly notificationService: NotificationService){}
+    private readonly notificationService: NotificationService, 
+    private readonly broadcastService: BroadCastService
+  ){}
   get firestore() {
     return admin.firestore();
   }
@@ -29,7 +33,7 @@ export class FirebaseService implements OnModuleInit {
     return admin.messaging();
   }
 
-  async saveAndSendNotification(userData: EmergencyData){
+  async triggerEmergency(userData: EmergencyData){
     try {
         const documentRef = this.firestore.collection('emergencies').doc()
         await documentRef.set({ id: documentRef.id, photoUri: "", location: new GeoPoint(userData.latitude,
@@ -41,7 +45,9 @@ export class FirebaseService implements OnModuleInit {
          });
 
         const usersRef = this.firestore.collection('users');
-        const querySnapshot = await usersRef.where('role', '==', 'officer').get();
+        const querySnapshot = await usersRef.where('role', '==', 'officer')
+          .where('email', '!=', userData.email)
+          .get();
         if (querySnapshot.empty){
           console.log('no documents found')
           throw new NotFoundException('No officers registered')
@@ -68,6 +74,7 @@ export class FirebaseService implements OnModuleInit {
               console.log('Null or empty deviceToken')
             }
           }
+          await this.sendSMSs(nearbyUsers)
           return documentRef.id
         }
         else{
@@ -92,7 +99,9 @@ export class FirebaseService implements OnModuleInit {
 
         const usersRef = this.firestore.collection('users');
         try {
-          const querySnapshot = await usersRef.where('role', 'in', ['officer', 'user']).get();
+          const querySnapshot = await usersRef.where('role', 'in', ['officer', 'user'])
+            .where('email', '!=', userData.email)
+            .get();
           if (querySnapshot.empty){
             console.log('no documents found')
             throw new NotFoundException('No users registered yet')
@@ -119,6 +128,7 @@ export class FirebaseService implements OnModuleInit {
                   console.log('Null or empty deviceToken')
                 }
               }
+              await this.sendSMSs(nearbyUsers)
               return documentRef.id
             }
             else{
@@ -192,7 +202,9 @@ export class FirebaseService implements OnModuleInit {
       }
       if (data.triggerType == 'emergency'){
         const usersRef = this.firestore.collection('users');
-        const querySnapshot = await usersRef.where('role', '==', 'officer').get();
+        const querySnapshot = await usersRef.where('role', '==', 'officer')
+          .where('email', '!=', data.email)
+          .get();
         if (querySnapshot.empty){
           console.log('no documents found')
           return;
@@ -225,7 +237,9 @@ export class FirebaseService implements OnModuleInit {
       }
       else{
         const usersRef = this.firestore.collection('users');
-          const querySnapshot = await usersRef.where('role', 'in', ['officer', 'user']).get();
+          const querySnapshot = await usersRef.where('role', 'in', ['officer', 'user'])
+            .where('email', '!=', data.email)
+            .get();
           if (querySnapshot.empty){
             console.log('no documents found')
             return;
@@ -255,6 +269,28 @@ export class FirebaseService implements OnModuleInit {
       
     } catch (error) {
       console.log(error)
+    }
+  }
+
+  async sendSMSs(nearbyUsers: any[]){
+    try {
+      const phoneNumbers = nearbyUsers
+            .map((user: any) => user?.phone)
+            .filter((phoneNumber: string | undefined | null) => phoneNumber && phoneNumber.trim() !== '');
+      const formattedNumbers = this.broadcastService.getFormattedPhoneNumber(phoneNumbers)
+      if (formattedNumbers.length != 0){
+        for (const phoneNumber of formattedNumbers){
+            await this.broadcastService.sendSMS(
+              'An emergency has been triggered near you! Check MalawiTcheru app for details',
+              phoneNumber
+            )
+        }
+      }
+      else{
+        console.log('No phoneNumbers')
+      }
+    } catch (error7) {
+      console.log(error7)
     }
   }
 }

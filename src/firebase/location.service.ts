@@ -32,7 +32,7 @@ export class LocationService{
         });
         
         let radius = 3;
-        const maxRadius = 10;
+        const maxRadius = 20;
         
         while (radius <= maxRadius) {
           const nearbyUsers = users.filter((user) => {
@@ -43,11 +43,16 @@ export class LocationService{
             return this.calculateDistance(targetLocation, userLocation) <= radius;
           });
         
-          if (nearbyUsers.length > 0) {
+          if (nearbyUsers.length > 2 || radius > 100) {
             return nearbyUsers;
           }
-          radius += 2;
+          if (radius > maxRadius){
+            radius += 10
+          }
+          else{
+            radius += 2;
+          }
         }
-        return []; // No users within 10km        
+        return [];
     }
 }

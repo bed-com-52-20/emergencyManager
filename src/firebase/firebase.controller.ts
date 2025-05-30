@@ -11,7 +11,7 @@ export class FirebaseController {
   async triggerEmergency(@Body() userData: EmergencyData) {
     console.log('Accesssed')
     try {
-        return await this.firebaseService.saveAndSendNotification(userData);
+        return await this.firebaseService.triggerEmergency(userData);
     } catch (error) {
         console.log(error)
         throw new HttpException('Operation failed', HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios from "axios";
-import { BroadcastToAllData, RequestData } from "src/dto/dto";
+import { BroadcastToAllData, RequestData, SMSResponse } from "src/dto/dto";
 import * as admin from 'firebase-admin';
 import { GeoPoint } from '@google-cloud/firestore';
 
@@ -13,9 +13,13 @@ export class BroadCastService{
         try {
             const usersRef = admin.firestore().collection('users');
             const querySnapshot = target == 'all' 
-                ? await usersRef.where('currentDistrict', '==', data.origin).get()
+                ? await usersRef.where('currentDistrict', '==', data.origin)
+                    .where('email', '!=', data.email)
+                    .get()
                 : await usersRef.where('role', '==', 'officer')
-                    .where('currentDistrict', '==', data.origin).get();
+                    .where('currentDistrict', '==', data.origin)
+                    .where('email', '!=', data.email)
+                    .get();
             if (querySnapshot.empty){
                 console.log('no documents found')
                 throw new NotFoundException('No officers registered')
@@ -33,10 +37,11 @@ export class BroadCastService{
                 }
                 const documentRef = admin.firestore().collection('broadcasts').doc();
                 await documentRef.set({id: documentRef.id, 
-                    broadcastType: target == 'all' ? 'toAll' : 'toOfficers', 
+                    broadcastType: target == 'all' ? 'Everyone' : 'Officers', 
                     date: admin.firestore.Timestamp.fromDate(new Date(data.sentAt)),
                     origin: data.origin, senderId: data.senderId, senderName: data.senderName,
                     senderLocation: new GeoPoint(data.latitude, data.longitude),
+                    message: data.message
                 })
             }
             else{
@@ -63,19 +68,38 @@ export class BroadCastService{
                 api_key: apiKey, password: password, text: message, numbers: phoneNumber, from: from,
             };
 
-            axios.post(smsUrl, requestData)
-                .then((response) => {
-                if (response.status === 200) {
-                  console.log(response.data);
-                } else {
-                  console.log(response.statusText);
-                }
-              })
-              .catch((error) => {
-                console.error(error);
-              });
+            const maxRetries = 10; // maximum number of retries
+            let retries = 0;
+
+            const sendSms = () => {
+                axios.post(smsUrl, requestData)
+                    .then((response) => {
+                        if (response.status === 200) {
+                            const data = response.data as SMSResponse;
+                            if (data.feedback === false) {
+                                if (retries < maxRetries) {
+                                    retries++;
+                                    console.log(`Retry ${retries}...`);
+                                    sendSms(); // retry
+                                } else {
+                                    console.log('Maximum retries exceeded.');
+                                }
+                            } else {
+                                console.log(response.data);
+                            }
+                        } else {
+                            console.log(response.statusText);
+                        }
+                    })
+                    .catch((error) => {
+                        console.log('post catch');
+                        console.error(error);
+                    });
+                };
+            sendSms();
         } catch (error0) {
             console.log(error0)
+            console.log('whole program catch')
         }
     }
 
